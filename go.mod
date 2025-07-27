@@ -1,4 +1,4 @@
-module folderwatcher
+module github.com/MonkyMars/image-watcher
 
 go 1.24.5
 
