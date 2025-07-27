@@ -35,18 +35,24 @@ github.com/radovskyb/watcher      // File system watching (if used)
 ```bash
 # Install libwebp-tools
 sudo dnf install libwebp-tools
+# Install exiftran
+sudo dnf install exiftran
 ```
 
 #### Linux (Ubuntu/Debian)
 ```bash
 # Install webp
 sudo apt-get install webp
+# Install exiftran
+sudo apt-get install exiftran
 ```
 
 #### macOS
 ```bash
 # Install libwebp via Homebrew
 brew install webp
+# Install exiftran via Homebrew
+brew install exiftran
 ```
 
 #### Windows
