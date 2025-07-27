@@ -77,7 +77,13 @@ func worker(id int) {
 func convert(path string, workerID int) {
 	time.Sleep(2 * time.Second) // Let the file settle
 
-	webpPath := strings.TrimSuffix(path, filepath.Ext(path)) + ".webp"
+	if err := fixOrientation(path); err != nil {
+		log.Printf("[Worker %d] Failed to fix orientation: %v\n", workerID, err)
+	}
+
+	ext := filepath.Ext(path)
+	fileName := strings.TrimSuffix(path, ext)
+	webpPath := fileName + ".webp"
 	cmd := exec.Command("cwebp", "-mt", "-q", "80", path, "-o", webpPath)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = io.Discard
@@ -99,4 +105,9 @@ func convert(path string, workerID int) {
 
 func isSupportedFormat(ext string) bool {
 	return slices.Contains(supportedFormats, strings.ToLower(ext))
+}
+
+func fixOrientation(path string) error {
+	cmd := exec.Command("exiftran", "-ai", path)
+	return cmd.Run()
 }
