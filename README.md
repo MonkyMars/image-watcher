@@ -69,7 +69,7 @@ cd image-watcher
 # Initialize Go module and install dependencies
 go mod tidy
 
-### make sure you've changed the path in main.go to your desired folder before building!
+# Make sure you've changed the path in main.go to your desired folder before building!
 
 # Build the application
 go build -o image-watcher
