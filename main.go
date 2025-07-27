@@ -1,113 +1,99 @@
 package main
 
 import (
-	"image"
-	_ "image/jpeg"
-	_ "image/png"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/kolesa-team/go-webp/encoder"
-	"github.com/kolesa-team/go-webp/webp"
-
 	"github.com/radovskyb/watcher"
 )
 
 var (
-	supportedFormats []string = []string{
-		".jpg",
-		".png",
-		".jpeg",
+	supportedFormats = []string{
+		".jpg", ".jpeg", ".png",
 	}
-	// Replace with your actual base directory
-	base string = "/home/[user]/Pictures" // Base directory to watch
+	base       = "/home/[user]/Pictures" // Replace with your actual path
+	workQueue  = make(chan string, 10)   // Buffered queue
+	numWorkers = 2                       // Max 2 conversions at a time
 )
 
 func main() {
 	w := watcher.New()
 	w.FilterOps(watcher.Create)
 
+	// Start the workers
+	for i := range numWorkers {
+		go worker(i)
+	}
+
+	// Watcher event loop
 	go func() {
 		for event := range w.Event {
 			if event.IsDir() {
+				// Automatically add new directories to the watcher
+				if err := w.AddRecursive(event.Path); err != nil {
+					log.Println("Failed to watch new dir:", err)
+				}
 				continue
 			}
-			extension := strings.ToLower(filepath.Ext(event.Path))
 
-			// Check if the file extension is supported
-			if isSupportedFormat(extension) {
-				go convert(event.Path) // Run conversion in its own goroutine
+			ext := strings.ToLower(filepath.Ext(event.Path))
+			if isSupportedFormat(ext) {
+				workQueue <- event.Path
 			}
 		}
 	}()
 
+	// Error handling
 	go func() {
 		for err := range w.Error {
 			log.Println("Watcher error:", err)
 		}
 	}()
 
+	// Initial directory load
 	if err := w.AddRecursive(base); err != nil {
 		log.Fatalln(err)
 	}
 
-	if err := w.Start(time.Second * 2); err != nil {
+	// Start watching
+	if err := w.Start(3 * time.Second); err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func convert(path string) {
-	time.Sleep(time.Second) // Let the file settle
-	start := time.Now()
-
-	file, err := os.Open(path)
-	if err != nil {
-		log.Println("Open error:", err)
-		return
+// worker handles image conversion
+func worker(id int) {
+	for path := range workQueue {
+		convert(path, id)
 	}
-	defer file.Close()
+}
 
-	img, _, err := image.Decode(file)
-	if err != nil {
-		log.Println("Decode error:", err)
-		return
-	}
+func convert(path string, workerID int) {
+	time.Sleep(2 * time.Second) // Let the file settle
 
 	webpPath := strings.TrimSuffix(path, filepath.Ext(path)) + ".webp"
-	output, err := os.Create(webpPath)
-	if err != nil {
-		log.Println("Create output error:", err)
-		return
-	}
-	defer output.Close()
+	cmd := exec.Command("cwebp", "-mt", "-q", "80", path, "-o", webpPath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
 
-	options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 80)
-	if err != nil {
-		log.Println("WebP options error:", err)
-		return
-	}
-
-	if err := webp.Encode(output, img, options); err != nil {
-		log.Println("WebP encoding error:", err)
+	start := time.Now()
+	if err := cmd.Run(); err != nil {
+		log.Printf("[Worker %d] Conversion error: %v\n", workerID, err)
 		return
 	}
 
 	if err := os.Remove(path); err != nil {
-		log.Println("Failed to delete original file:", err)
+		log.Printf("[Worker %d] Failed to delete original: %v\n", workerID, err)
+		return
 	}
 
-	relative, err := filepath.Rel(base, webpPath)
-	if err != nil {
-		log.Println("Failed to get relative path:", err)
-	}
-
-	elapsed := time.Since(start)
-	seconds := elapsed.Seconds()
-	log.Printf("Converted to %s in %.1f seconds\n", relative, seconds)
+	rel, _ := filepath.Rel(base, webpPath)
+	log.Printf("[Worker %d] Converted to %s in %.1fs\n", workerID, rel, time.Since(start).Seconds())
 }
 
 func isSupportedFormat(ext string) bool {
