@@ -9,7 +9,7 @@ An efficient Go-based utility that automatically monitors directories for new im
 - **Multiple Format Support**: Converts JPEG, PNG, GIF, and other common image formats to WebP
 - **Space Optimization**: Significantly reduces file sizes while maintaining visual quality
 - **Lightweight**: Minimal resource usage with efficient polling mechanism
-- **Cross-Platform**: Works on Linux, macOS, and Windows
+- **Cross-Platform**: Works on Linux and macOS
 
 ## Requirements
 
