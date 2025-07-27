@@ -6,7 +6,7 @@ An efficient Go-based utility that automatically monitors directories for new im
 
 - **Automatic Directory Monitoring**: Polls target directories every 2 seconds for new image files
 - **Concurrent Processing**: Utilizes Go routines for fast, efficient image conversion
-- **Multiple Format Support**: Converts JPEG, PNG, GIF, and other common image formats to WebP
+- **Multiple Format Support**: Converts JPEG, PNG, and other common image formats to WebP
 - **Space Optimization**: Significantly reduces file sizes while maintaining visual quality
 - **Lightweight**: Minimal resource usage with efficient polling mechanism
 - **Cross-Platform**: Works on Linux and macOS
