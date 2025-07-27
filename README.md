@@ -33,14 +33,14 @@ github.com/radovskyb/watcher      // File system watching (if used)
 
 #### Linux (Fedora/RHEL)
 ```bash
-# Install libwebp development headers
-sudo dnf install libwebp-devel
+# Install libwebp-tools
+sudo dnf install libwebp-tools
 ```
 
 #### Linux (Ubuntu/Debian)
 ```bash
-# Install libwebp development headers
-sudo apt-get install libwebp-dev
+# Install webp
+sudo apt-get install webp
 ```
 
 #### macOS
@@ -50,9 +50,8 @@ brew install webp
 ```
 
 #### Windows
-WebP libraries are typically bundled with the Go WebP packages, but you may need:
-- Visual C++ Redistributable
-- Windows SDK (for CGO compilation)
+The current implementation is not tested on Windows, since I dont have a windows machine.
+If you have tested it on Windows 10+, please open an issue and this will be updated.
 
 ## Installation
 
