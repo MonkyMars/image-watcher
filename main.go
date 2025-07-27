@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -79,7 +80,7 @@ func convert(path string, workerID int) {
 	webpPath := strings.TrimSuffix(path, filepath.Ext(path)) + ".webp"
 	cmd := exec.Command("cwebp", "-mt", "-q", "80", path, "-o", webpPath)
 	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = io.Discard
 
 	start := time.Now()
 	if err := cmd.Run(); err != nil {
