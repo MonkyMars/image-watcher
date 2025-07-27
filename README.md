@@ -158,8 +158,8 @@ sudo apt install libwebp-dev    # Ubuntu
 ```
 
 **High CPU usage:**
-- Increase polling interval: `-interval 5s`
-- Reduce concurrent processing by limiting directory size
+- Increase polling interval
+- Limit the numworkers in main.go to 1
 
 **Permission denied:**
 - Ensure read/write permissions on target directories
